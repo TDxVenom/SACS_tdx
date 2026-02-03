@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoG shift → DATA gen</title>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #000;
+            --accent: #007AFF;
+            --success: #34C759;
+            --glass: rgba(255,255,255,0.08);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #000;
+            min-height: 100vh;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Apple-style floating lights */
+        .hero-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse 80% 50% at 20% -20%, rgba(120,119,198,0.3) 0%, transparent 50%),
+                        radial-gradient(ellipse 80% 50% at 80% 80%, rgba(255,119,198,0.3) 0%, transparent 50%),
+                        radial-gradient(ellipse 80% 50% at 40% 40%, rgba(120,219,255,0.4) 0%, transparent 50%),
+                        radial-gradient(ellipse 80% 50% at 60% 60%, rgba(0,199,190,0.3) 0%, transparent 50%);
+            z-index: 1;
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+        
+        @keyframes bgFloat {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            33% { transform: scale(1.02) rotate(0.5deg); }
+            66% { transform: scale(0.98) rotate(-0.5deg); }
+        }
+        
+        .container {
+            max-width: 1200px; margin: 0 auto; padding: 0 24px;
+            position: relative; z-index: 10; min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        
+        /* APPLE TITLE ANIMATION */
+        .hero {
+            text-align: center;
+            margin-bottom: 120px;
+        }
+        
+        .title-main {
+            font-size: clamp(80px, 15vw, 140px);
+            font-weight: 700;
+            line-height: 0.9;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(60px);
+            animation: appleSlideIn 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+        }
+        
+        .title-sub {
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 400;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: appleSlideIn 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s forwards;
+            margin-bottom: 16px;
+        }
+        
+        .title-desc {
+            font-size: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: appleSlideIn 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.9s forwards;
+            max-width: 600px;
+            margin: 0 auto 60px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        @keyframes appleSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .title-main span {
+            display: inline-block;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .title-sub span {
+            color: #007AFF;
+            font-weight: 600;
+        }
+        
+        /* Glass cards */
+        .glass-card {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(40px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 48px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.3);
+            transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 48px 96px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
+        .input-group {
+            margin-bottom: 40px;
+        }
+        
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideInUp 1s cubic-bezier(0.25,0.46,0.45,0.94) 1.2s forwards;
+        }
+        
+        .label-icon {
+            width: 32px; height: 32px;
+            background: rgba(0,122,255,0.8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .code-input {
+            width: 100%;
+            height: 300px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 24px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 16px;
+            color: white;
+            resize: vertical;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: scale(0.95);
+            animation: scaleIn 1s cubic-bezier(0.25,0.46,0.45,0.94) 1.4s forwards;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 4px rgba(0,122,255,0.2);
+            transform: scale(1.02);
+        }
+        
+        @keyframes slideInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes scaleIn {
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .convert-btn {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white;
+            border: none;
+            padding: 24px 80px;
+            font-size: 22px;
+            font-weight: 600;
+            border-radius: 24px;
+            cursor: pointer;
+            display: block;
+            margin: 60px auto;
+            transition: all 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+            box-shadow: 0 20px 40px rgba(0,122,255,0.4);
+            font-family: 'SF Pro Display', sans-serif;
+            position: relative;
+            overflow: hidden;
+            min-width: 280px;
+        }
+        
+        .convert-btn:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 32px 64px rgba(0,122,255,0.5);
+        }
+        
+        .status {
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+            margin: 40px 0;
+            backdrop-filter: blur(20px);
+            display: none;
+        }
+        
+        .status.success {
+            background: rgba(52,199,89,0.2);
+            border: 2px solid rgba(52,199,89,0.5);
+            color: #34C759;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 40px 20px; }
+            .title-main { font-size: 60px; }
+            .glass-card { padding: 32px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-bg"></div>
+    
+    <div class="container">
+        <div class="hero">
+            <h1 class="title-main">
+                <span>CoG shift</span>
+            </h1>
+            <h2 class="title-sub">
+                <span>→ DATA gen</span>
+            </h2>
+            <p class="title-desc">
+                SACS Load Converter • Professional Offshore Engineering Tool
+            </p>
+        </div>
+        
+        <div class="glass-card">
+            <div class="input-group">
+                <label class="input-label">
+                    <div class="label-icon">📥</div>
+                    SET1 Input Data
+                </label>
+                <textarea class="code-input" id="inputText" 
+                          placeholder="Paste your SET1 CoG shift load conditions here...&#10;&#10;Press Ctrl+Enter for instant conversion to SET2 format"></textarea>
+            </div>
+            
+            <button class="convert-btn" onclick="convertData()">
+                Convert to SET2 →
+            </button>
+            
+            <div class="status" id="status"></div>
+            
+            <div class="input-group" id="outputGroup" style="display: none;">
+                <label class="input-label">
+                    <div class="label-icon">📤</div>
+                    SET2 Output • Ready for SACS
+                </label>
+                <textarea class="code-input" id="outputText" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function convertData() {
+            const input = document.getElementById('inputText').value;
+            const status = document.getElementById('status');
+            const outputGroup = document.getElementById('outputGroup');
+            const outputText = document.getElementById('outputText');
+            
+            if (!input.includes('SET1')) {
+                status.textContent = 'Please paste valid SET1 data';
+                status.className = 'status';
+                status.style.display = 'block';
+                return;
+            }
+            
+            status.textContent = 'Converting to SET2 format...';
+            status.className = 'status';
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                const lines = input.split('\n');
+                let maxLen = 0;
+                
+                for (let line of lines) {
+                    if (line.trim() && !line.trim().startsWith('SET1')) {
+                        maxLen = Math.max(maxLen, line.length);
+                    }
+                }
+                
+                let result = 'SET2\n';
+                let skipHeader = true;
+                
+                for (let line of lines) {
+                    if (skipHeader && line.trim() === 'SET1') {
+                        skipHeader = false;
+                        continue;
+                    }
+                    if (line.trim()) {
+                        const padded = line.padEnd(Math.max(maxLen + 45, 130));
+                        result += padded + '\r\n';
+                    }
+                }
+                
+                outputText.value = result;
+                outputGroup.style.display = 'block';
+                status.textContent = '✓ Perfectly converted! Copied to clipboard.';
+                status.className = 'status success';
+                
+                navigator.clipboard.writeText(result);
+                outputGroup.scrollIntoView({ behavior: 'smooth' });
+            }, 600);
+        }
+        
+        document.getElementById('inputText').addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                convertData();
+            }
+        });
+        
+        document.getElementById('inputText').focus();
+    </script>
+</body>
+</html>
